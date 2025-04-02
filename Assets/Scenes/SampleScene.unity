@@ -228,6 +228,7 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
+  - component: {fileID: 963194230}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -303,7 +304,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.96, z: -9.14}
+  m_LocalPosition: {x: 0, y: 4.2, z: -6.51}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -326,6 +327,15 @@ MonoBehaviour:
   refractionDownsample: 1
   thicknessDownsample: 1
   foamFadeDepth: 1
+--- !u!45 &963194230
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: 1cf6f4c6e6e0518419839d3f5448dd99, type: 2}
 --- !u!1 &1276954750
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,7 +483,7 @@ MonoBehaviour:
   filter: -65534
   emissionMethod: 0
   minPoolSize: 0.5
-  speed: 4
+  speed: 2
   lifespan: Infinity
   randomDirection: 0
   useShapeColor: 1
@@ -658,15 +668,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 64df75de10b494f109b074d28a8eade0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.83501
+      value: 0.59856164
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 64df75de10b494f109b074d28a8eade0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.6074865
+      value: 0.43546557
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 64df75de10b494f109b074d28a8eade0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.83501
+      value: 0.59856164
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 64df75de10b494f109b074d28a8eade0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -674,7 +684,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 64df75de10b494f109b074d28a8eade0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.98129
+      value: 2.06
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 64df75de10b494f109b074d28a8eade0, type: 3}
       propertyPath: m_LocalPosition.z
