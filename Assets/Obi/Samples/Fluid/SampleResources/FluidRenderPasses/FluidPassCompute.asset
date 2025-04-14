@@ -25,20 +25,20 @@ MonoBehaviour:
   customUnderwaterMaterial: {fileID: 0}
   reflectionCubemap: {fileID: 0}
   smoothness: 0.9
-  metallic: 0
-  turbidity: {r: 0.98742133, g: 0.40676785, b: 0.82584274, a: 0}
+  metallic: 0.619
+  turbidity: {r: 1, g: 1, b: 1, a: 0}
   thickness: 1
   indexOfRefraction: 1.33
   diffuseMap: {fileID: 0}
-  diffuseColor: {r: 1, g: 1, b: 1, a: 1}
+  diffuseColor: {r: 0.19240017, g: 0.17924517, b: 1, a: 1}
   normalMap: {fileID: 0}
-  normalMapIntensity: 1
+  normalMapIntensity: 0.554
   normalMapVelocityRange: {x: 10, y: 0}
-  tiling: 1
-  noiseMap: {fileID: 0}
-  noiseMapIntensity: 0.1
-  noiseMapTiling: 0.1
-  advectTimescale: 1
+  tiling: 0.2
+  noiseMap: {fileID: 2800000, guid: 19feb475727cfd8419e63ca0f1f3571d, type: 3}
+  noiseMapIntensity: 0
+  noiseMapTiling: 8.66
+  advectTimescale: 1.31
   advectJump: {x: 0, y: 0, z: 0, w: 0}
   advectOffset: -0.5
   triplanarBlend: 16
