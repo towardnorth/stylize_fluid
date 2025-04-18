@@ -24,13 +24,13 @@ MonoBehaviour:
   customFluidMaterial: {fileID: 0}
   customUnderwaterMaterial: {fileID: 0}
   reflectionCubemap: {fileID: 0}
-  smoothness: 0.9
-  metallic: 0.619
-  turbidity: {r: 1, g: 1, b: 1, a: 0}
+  smoothness: 0.866
+  metallic: 0.67
+  turbidity: {r: 1, g: 0.53285354, b: 0, a: 1}
   thickness: 1
   indexOfRefraction: 1.33
   diffuseMap: {fileID: 0}
-  diffuseColor: {r: 0.19240017, g: 0.17924517, b: 1, a: 1}
+  diffuseColor: {r: 1, g: 1, b: 1, a: 1}
   normalMap: {fileID: 0}
   normalMapIntensity: 0.554
   normalMapVelocityRange: {x: 10, y: 0}
