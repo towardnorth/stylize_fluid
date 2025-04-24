@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using System;
 
 
 public class Message
@@ -126,22 +127,49 @@ public class FluidMoodController : MonoBehaviour
         if (ObiEmitter != null)
         {
             var fluidSurfaceMesher=ObiEmitter.GetComponent<ObiFluidSurfaceMesher>();
-            ObiFluidRenderingPass fluidPass = fluidSurfaceMesher.pass as ObiFluidRenderingPass;
+            
             ObiFluidEmitterBlueprint obiFluidEmitterBlueprint=ObiEmitter.blueprint as ObiFluidEmitterBlueprint;
 
-            if (fluidSurfaceMesher != null)
+            if (fluidSurfaceMesher != null && obiFluidEmitterBlueprint != null)
             {
-                // 设置颜色（通过反射）
+                ObiSolver solver = ObiEmitter.GetComponentInParent<ObiSolver>();
+
+                // 1. 创建 Blueprint 的运行时副本（可选，视需求而定）
+                ObiFluidEmitterBlueprint blueprintCopy = Instantiate(obiFluidEmitterBlueprint);
+                if (solver == null)
+                {
+                    Debug.LogError("ObiSolver 未找到，请确保 ObiEmitter 已绑定到 ObiSolver");
+                    return;
+                }
+                // 2. 修改 Blueprint 的 smoothing 属性
+                blueprintCopy.smoothing = smoothness;
                 
+                // 3. 同步调用 Generate() 重新生成 Blueprint 数据
+                blueprintCopy.GenerateImmediate();
                 
-                obiFluidEmitterBlueprint.smoothing = smoothness;
-                obiFluidEmitterBlueprint.GenerateImmediate();
-                fluidPass.smoothness = smoothness;
-                fluidPass.turbidity = color;
+                // 4. 重新挂载 Blueprint 到 ObiEmitter
+                ObiEmitter.emitterBlueprint = blueprintCopy;
+                
+                ObiEmitter.LoadBlueprint(solver);
+                
+                // 5. 获取并更新 ObiFluidRenderingPass
+                ObiFluidRenderingPass fluidPass = fluidSurfaceMesher.pass as ObiFluidRenderingPass;
+                if (fluidPass != null)
+                {
+                    // 设置颜色和 smoothness
+                    fluidPass.turbidity = color;
+                    fluidPass.smoothness = smoothness;
+
+                    
+                }
+                else
+                {
+                    Debug.LogWarning("ObiFluidRenderingPass 未找到，无法设置颜色和 smoothness");
+                }
             }
             else
             {
-                Debug.LogWarning("ObiFluidSurfaceMesher 未找到，仅设置了粒子颜色");
+                Debug.LogWarning("ObiFluidSurfaceMesher 或 ObiFluidEmitterBlueprint 未找到");
             }
         }
         else

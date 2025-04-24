@@ -41,5 +41,10 @@ namespace Obi
 
             yield return new CoroutineJob.ProgressInfo("ObiEmitter: done", 1);
         }
+
+        public IEnumerator PublicInitialize()
+        {
+            return Initialize();
+        }
     }
 }
