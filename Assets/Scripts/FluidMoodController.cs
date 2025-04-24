@@ -54,16 +54,28 @@ public class FluidMoodController : MonoBehaviour
         request.SetRequestHeader("Content-Type", "application/json");
         request.SetRequestHeader("Authorization", "Bearer " + apiKey);
         yield return request.SendWebRequest();
-        if (request.result == UnityWebRequest.Result.ConnectionError ||
-        request.result == UnityWebRequest.Result.ProtocolError)
+        if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.LogError($"Error: {request.error}");
-            Debug.LogError($"Response Code: {request.responseCode}");
-            Debug.LogError($"Response Text: {request.downloadHandler.text}");
+            // 输出原始响应内容，用于调试
+            Debug.Log("API 响应内容: " + request.downloadHandler.text);
+
+            // 使用 ApiResponse 解析 JSON
+            ApiResponse response = JsonConvert.DeserializeObject<ApiResponse>(request.downloadHandler.text);
+
+            // 检查 response 和 choices 是否为空
+            if (response?.choices != null && response.choices.Count > 0)
+            {
+                string responseText = response.choices[0].message.content;
+                ParseMoodParameters(responseText);
+            }
+            else
+            {
+                Debug.LogError("API 响应中没有 choices 或 choices 为空。响应内容: " + request.downloadHandler.text);
+            }
         }
         else
         {
-            Debug.Log("Success: " + request.downloadHandler.text);
+            Debug.LogError("请求失败: " + request.error);
         }
     }
     
@@ -114,14 +126,22 @@ public class FluidMoodController : MonoBehaviour
         if (ObiEmitter != null)
         {
             var fluidSurfaceMesher=ObiEmitter.GetComponent<ObiFluidSurfaceMesher>();
-            if(fluidSurfaceMesher != null)
+            ObiFluidRenderingPass fluidPass = fluidSurfaceMesher.pass as ObiFluidRenderingPass;
+            ObiFluidEmitterBlueprint obiFluidEmitterBlueprint=ObiEmitter.blueprint as ObiFluidEmitterBlueprint;
+
+            if (fluidSurfaceMesher != null)
             {
-                fluidSurfaceMesher.GetType().GetProperty("turbidity");
-                fluidSurfaceMesher.GetType().GetProperty("smoothness");
+                // 设置颜色（通过反射）
+                
+                
+                obiFluidEmitterBlueprint.smoothing = smoothness;
+                obiFluidEmitterBlueprint.GenerateImmediate();
+                fluidPass.smoothness = smoothness;
+                fluidPass.turbidity = color;
             }
             else
             {
-                Debug.LogError("ObiFluidSurfaceMesher 未找到，确保它已添加到 ObiEmitter 上");
+                Debug.LogWarning("ObiFluidSurfaceMesher 未找到，仅设置了粒子颜色");
             }
         }
         else

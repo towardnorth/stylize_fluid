@@ -24,9 +24,9 @@ MonoBehaviour:
   customFluidMaterial: {fileID: 0}
   customUnderwaterMaterial: {fileID: 0}
   reflectionCubemap: {fileID: 0}
-  smoothness: 0.866
+  smoothness: 0.9
   metallic: 0.67
-  turbidity: {r: 1, g: 0.53285354, b: 0, a: 1}
+  turbidity: {r: 1, g: 1, b: 0, a: 1}
   thickness: 1
   indexOfRefraction: 1.33
   diffuseMap: {fileID: 0}
