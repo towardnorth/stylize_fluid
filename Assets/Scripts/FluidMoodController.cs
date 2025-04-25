@@ -42,7 +42,7 @@ public class FluidMoodController : MonoBehaviour
             model = "gpt-3.5-turbo",
             messages = new[]
             {
-                new { role = "user", content = $"根据心情\"{mood}\"返回流体模拟的参数，严格使用以下格式：color: [R, G, B, A]& smoothness: [平滑值]，例如 color: [0.2, 0.4, 0.6, 1.0]& smoothness: 0.8。R, G, B, A 必须是 0.0 到 1.0 的浮点数，color 必须包含完整的四个值，参数之间用&加空格（& ）分隔，smoothness 后不要加句号，确保输出完整且格式正确。" }
+                new { role = "user", content = $"根据心情\"{mood}\"返回流体模拟的参数，严格使用以下格式：color: [R, G, B, A]& smoothness: [平滑值]& viscosity: [粘滞性]& polarty: [极性]& vorticity: [涡旋值]，例如 color: [0.2, 0.4, 0.6, 1.0]& smoothness: 0.8& viscosity: 0.05& polarity: 0.5& vorticity: 0.5。R, G, B, A 必须是 0.0 到 1.0 的浮点数，color 必须包含完整的四个值，参数之间用&加空格（& ）分隔，vorticity后不要加句号，确保输出完整且格式正确。" }
             },
             max_tokens = 50 // 保持 200，确保足够生成完整响应
         };
@@ -84,7 +84,9 @@ public class FluidMoodController : MonoBehaviour
         }
         Color fluidColor = Color.white; // 默认颜色
         float smoothness = 0.88f; // 默认平滑值
-
+        float vorticity = 0;
+        float polarity = 0.2f;
+        float viscosity = 0.02f;
         // 按 ", " 分割 color 和 smoothness 参数
         string[] parameters = responseText.Split(new[] { "& " }, StringSplitOptions.RemoveEmptyEntries);
         Debug.Log("分割后的参数: " + string.Join(" | ", parameters)); // 调试：记录分割结果
@@ -143,6 +145,39 @@ public class FluidMoodController : MonoBehaviour
                         smoothness = parsedSmoothness;
                     }
                 }
+                else if (key == "polarity")
+                {
+                    if (!float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedPolarity))
+                    {
+                        Debug.LogError($"无法解析极性值: {value}");
+                    }
+                    else
+                    {
+                        vorticity = parsedPolarity;
+                    }
+                }
+                else if(key== "viscosity")
+                {
+                    if (!float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedViscosity))
+                    {
+                        Debug.LogError($"无法解析粘滞性值: {value}");
+                    }
+                    else
+                    {
+                        viscosity = parsedViscosity;
+                    }
+                }
+                else if (key == "vorticity")
+                {
+                    if (!float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedVorticity))
+                    {
+                        Debug.LogError($"无法解析涡旋值: {value}");
+                    }
+                    else
+                    {
+                        vorticity = parsedVorticity;
+                    }
+                }
             }
             else
             {
@@ -156,10 +191,10 @@ public class FluidMoodController : MonoBehaviour
                 }
             }
         }
-        ApplyFluidParameters(fluidColor, smoothness);
+        ApplyFluidParameters(fluidColor, smoothness, polarity, vorticity, viscosity);
     }
 
-    private void ApplyFluidParameters(Color color, float smoothness)
+    private void ApplyFluidParameters(Color color, float smoothness, float polarity,float vorticity,float viscosity)
     {
         if (ObiEmitter != null)
         {
@@ -174,7 +209,9 @@ public class FluidMoodController : MonoBehaviour
                     Debug.LogError("ObiSolver 未找到，请确保 ObiEmitter 已绑定到 ObiSolver");
                     return;
                 }
-                blueprintCopy.smoothing = smoothness;
+                blueprintCopy.vorticity = vorticity;
+                blueprintCopy.polarity = polarity;
+                blueprintCopy.viscosity = viscosity;
                 blueprintCopy.GenerateImmediate();
                 ObiEmitter.emitterBlueprint = blueprintCopy;
                 ObiEmitter.LoadBlueprint(solver);

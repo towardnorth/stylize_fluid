@@ -3158,7 +3158,7 @@ MonoBehaviour:
   capacity: 3100
   resolution: 0.2
   restDensity: 1000
-  smoothing: 1
+  smoothing: 2
   viscosity: 0.01
   polarity: 0.01
   vorticity: 0
