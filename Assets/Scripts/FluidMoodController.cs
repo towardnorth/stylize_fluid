@@ -42,9 +42,9 @@ public class FluidMoodController : MonoBehaviour
             model = "gpt-3.5-turbo",
             messages = new[]
             {
-                new { role = "user", content = $"根据心情\"{mood}\"返回流体模拟的参数，严格使用以下格式：color: [R, G, B, A], smoothness: [平滑值]，例如 color: [0.2, 0.4, 0.6, 1.0], smoothness: 0.8。R, G, B, A 必须是 0.0 到 1.0 的浮点数，color 必须包含完整的四个值，参数之间用逗号加空格（, ）分隔，smoothness 后不要加句号，确保输出完整且格式正确。" }
+                new { role = "user", content = $"根据心情\"{mood}\"返回流体模拟的参数，严格使用以下格式：color: [R, G, B, A]& smoothness: [平滑值]，例如 color: [0.2, 0.4, 0.6, 1.0]& smoothness: 0.8。R, G, B, A 必须是 0.0 到 1.0 的浮点数，color 必须包含完整的四个值，参数之间用&加空格（& ）分隔，smoothness 后不要加句号，确保输出完整且格式正确。" }
             },
-            max_tokens = 200
+            max_tokens = 50 // 保持 200，确保足够生成完整响应
         };
         string jsonData = JsonConvert.SerializeObject(requestData);
         UnityWebRequest request = new UnityWebRequest(apiUrl, "POST");
@@ -61,7 +61,7 @@ public class FluidMoodController : MonoBehaviour
             if (response?.choices != null && response.choices.Count > 0)
             {
                 string responseText = response.choices[0].message.content;
-                Debug.Log("解析的 responseText: " + responseText);
+                Debug.Log("解析的 responseText: " + responseText); // 调试：记录 responseText
                 ParseMoodParameters(responseText);
             }
             else
@@ -85,69 +85,77 @@ public class FluidMoodController : MonoBehaviour
         Color fluidColor = Color.white; // 默认颜色
         float smoothness = 0.88f; // 默认平滑值
 
-        // 按 ", smoothness:" 分割，分为 color 和 smoothness 部分
-        string[] parts = responseText.Split(new[] { ", smoothness:" }, StringSplitOptions.RemoveEmptyEntries);
-        Debug.Log("按 ', smoothness:' 分割后的部分: " + string.Join(" | ", parts));
+        // 按 ", " 分割 color 和 smoothness 参数
+        string[] parameters = responseText.Split(new[] { "& " }, StringSplitOptions.RemoveEmptyEntries);
+        Debug.Log("分割后的参数: " + string.Join(" | ", parameters)); // 调试：记录分割结果
 
-        if (parts.Length != 2)
+        foreach (var param in parameters)
         {
-            Debug.LogError($"期望 2 个部分（color 和 smoothness），实际得到 {parts.Length} 个部分: {responseText}");
-            return;
-        }
-
-        // 解析 color 部分
-        string colorPart = parts[0].Trim();
-        string[] colorKv = colorPart.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-        if (colorKv.Length == 2 && colorKv[0].Trim().ToLower() == "color")
-        {
-            string value = colorKv[1].Trim();
-            int startIndex = value.IndexOf('[');
-            int endIndex = value.IndexOf(']');
-            if (startIndex >= 0 && endIndex > startIndex)
+            // 清理参数，去除多余的空格和句号
+            string cleanedParam = param.Trim().TrimEnd('.');
+            string[] kv = cleanedParam.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            if (kv.Length == 2)
             {
-                string rgbaString = value.Substring(startIndex + 1, endIndex - startIndex - 1);
-                string[] rgbaValues = rgbaString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                if (rgbaValues.Length == 4)
+                string key = kv[0].Trim().ToLower();
+                string value = kv[1].Trim();
+                if (key == "color")
                 {
-                    try
+                    // 提取 [ 和 ] 之间的 RGBA 值
+                    int startIndex = value.IndexOf('[');
+                    int endIndex = value.IndexOf(']');
+                    if (startIndex >= 0 && endIndex > startIndex)
                     {
-                        float r = float.Parse(rgbaValues[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-                        float g = float.Parse(rgbaValues[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-                        float b = float.Parse(rgbaValues[2].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-                        float a = float.Parse(rgbaValues[3].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-                        fluidColor = new Color(r, g, b, a);
+                        string rgbaString = value.Substring(startIndex + 1, endIndex - startIndex - 1);
+                        string[] rgbaValues = rgbaString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (rgbaValues.Length == 4)
+                        {
+                            try
+                            {
+                                float r = float.Parse(rgbaValues[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+                                float g = float.Parse(rgbaValues[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+                                float b = float.Parse(rgbaValues[2].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+                                float a = float.Parse(rgbaValues[3].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+                                fluidColor = new Color(r, g, b, a);
+                            }
+                            catch (FormatException ex)
+                            {
+                                Debug.LogError($"无法解析 RGBA 值: {value}, 错误: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogError($"RGBA 格式错误，期望 4 个值，实际得到 {rgbaValues.Length} 个值: {value}");
+                        }
                     }
-                    catch (FormatException ex)
+                    else
                     {
-                        Debug.LogError($"无法解析 RGBA 值: {value}, 错误: {ex.Message}");
+                        Debug.LogError($"无法找到 RGBA 数组的完整方括号: {value}");
                     }
                 }
-                else
+                else if (key == "smoothness")
                 {
-                    Debug.LogError($"RGBA 格式错误，期望 4 个值，实际得到 {rgbaValues.Length} 个值: {value}");
+                    if (!float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedSmoothness))
+                    {
+                        Debug.LogError($"无法解析平滑值: {value}");
+                    }
+                    else
+                    {
+                        smoothness = parsedSmoothness;
+                    }
                 }
             }
             else
             {
-                Debug.LogError($"无法找到 RGBA 数组的完整方括号: {value}");
+                // 处理孤立值（如 "0.9"）
+                Debug.LogWarning($"参数格式错误: {cleanedParam}，期望 key:value 格式，实际得到 {kv.Length} 部分");
+                // 尝试作为 smoothness 处理（备用逻辑）
+                if (float.TryParse(cleanedParam, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedSmoothness))
+                {
+                    smoothness = parsedSmoothness;
+                    Debug.Log($"将孤立值 {cleanedParam} 解析为 smoothness: {smoothness}");
+                }
             }
         }
-        else
-        {
-            Debug.LogError($"color 参数格式错误: {colorPart}");
-        }
-
-        // 解析 smoothness 部分
-        string smoothnessPart = parts[1].Trim();
-        if (!float.TryParse(smoothnessPart, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedSmoothness))
-        {
-            Debug.LogError($"无法解析平滑值: {smoothnessPart}");
-        }
-        else
-        {
-            smoothness = parsedSmoothness;
-        }
-
         ApplyFluidParameters(fluidColor, smoothness);
     }
 
